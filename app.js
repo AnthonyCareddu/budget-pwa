@@ -5,8 +5,8 @@
  *  Tu peux aussi les saisir dans l'app via ⚙️ Réglages (elles priment alors).
  * ========================================================================== */
 const DEFAULTS = {
-  API_URL: 'https://script.google.com/macros/s/PASTE_DEPLOYMENT_ID/exec',
-  GOOGLE_CLIENT_ID: 'PASTE_CLIENT_ID.apps.googleusercontent.com',
+  API_URL: 'https://script.google.com/macros/s/AKfycbzLfQfOpAPaMt6OKygBHA0PrJahOoc7sys5SAxDcUzt5ZH5p5WCXhjRxXvNM8zLzkk/exec',
+  GOOGLE_CLIENT_ID: '291608936405-ddbgkq5hchqu42n3k92ajo95guokt6vn.apps.googleusercontent.com',
 };
 
 const FALLBACK_CATS = [
