@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Budget</title>
+
+  <meta name="theme-color" content="#141b38">
+  <meta name="color-scheme" content="dark light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Budget">
+
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://accounts.google.com;
+    style-src 'self' 'unsafe-inline' https://accounts.google.com;
+    img-src 'self' data: https://*.googleusercontent.com https://*.google.com;
+    font-src 'self';
+    connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com https://oauth2.googleapis.com https://*.googleusercontent.com;
+    frame-src https://accounts.google.com;
+    base-uri 'self';
+    form-action 'self';
+  ">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= ÉCRAN DE CONNEXION ================= -->
+  <div id="auth" class="auth" hidden>
+    <div class="auth-card">
+      <img class="auth-logo" src="icons/icon-192.png" alt="" width="72" height="72">
+      <h1>Budget</h1>
+      <p class="auth-sub">Connexion réservée à ton compte Google.</p>
+      <div id="gbtn"></div>
+      <button id="gbtn-fallback" class="btn btn-google" hidden>Se connecter avec Google</button>
+      <p id="auth-error" class="auth-error" role="alert" hidden></p>
+      <button id="auth-settings-link" class="linklike" type="button">Réglages</button>
+    </div>
+  </div>
+
+  <!-- ================= APPLICATION ================= -->
+  <div id="app" hidden>
+
+    <!-- ---------- SAISIE ---------- -->
+    <section id="screen-saisie" class="screen" data-title="Saisie">
+      <header class="screen-head">
+        <h2>Nouvelle opération</h2>
+        <button class="icon-btn" id="open-settings" type="button" aria-label="Réglages">⚙️</button>
+      </header>
+
+      <form id="op-form" autocomplete="off" novalidate>
+        <div class="seg seg-3" role="tablist" aria-label="Type">
+          <button type="button" class="seg-item is-active" data-field="type" data-value="Sortie">Sortie</button>
+          <button type="button" class="seg-item" data-field="type" data-value="Rentrée">Rentrée</button>
+          <button type="button" class="seg-item" data-field="type" data-value="Transfert">Transfert</button>
+        </div>
+
+        <label class="field montant-field">
+          <span class="field-label">Montant</span>
+          <div class="montant-wrap">
+            <input id="f-montant" name="montant" type="text" inputmode="decimal"
+                   placeholder="0,00" enterkeyhint="next" required>
+            <span class="montant-cur">€</span>
+          </div>
+        </label>
+
+        <label class="field" id="field-libelle">
+          <span class="field-label">Libellé</span>
+          <input id="f-libelle" name="libelle" type="text" placeholder="ex. Courses Leclerc"
+                 enterkeyhint="done" autocapitalize="sentences">
+          <ul id="suggestions" class="suggestions" hidden></ul>
+        </label>
+
+        <div class="field" id="field-compte">
+          <span class="field-label" id="label-compte">Compte</span>
+          <div class="seg" id="seg-compte" role="group" aria-label="Compte"></div>
+        </div>
+
+        <div class="field" id="field-vers" hidden>
+          <span class="field-label">Vers</span>
+          <div class="seg" id="seg-vers" role="group" aria-label="Compte cible"></div>
+        </div>
+
+        <label class="field" id="field-categorie">
+          <span class="field-label">Catégorie</span>
+          <select id="f-categorie" name="categorie"></select>
+        </label>
+
+        <div class="field" id="field-nature">
+          <span class="field-label">Nature</span>
+          <div class="seg seg-4" role="group" aria-label="Nature">
+            <button type="button" class="seg-item" data-field="nature" data-value="Obligatoire">Oblig.</button>
+            <button type="button" class="seg-item is-active" data-field="nature" data-value="Optionnel">Option.</button>
+            <button type="button" class="seg-item" data-field="nature" data-value="Neutre">Neutre</button>
+            <button type="button" class="seg-item" data-field="nature" data-value="Epargne">Épargne</button>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Date</span>
+          <input id="f-date" name="date" type="date" required>
+        </label>
+
+        <button type="submit" id="op-submit" class="btn btn-primary">Ajouter l'opération</button>
+        <p id="queue-note" class="queue-note" hidden></p>
+      </form>
+    </section>
+
+    <!-- ---------- TABLEAU DE BORD ---------- -->
+    <section id="screen-bord" class="screen" data-title="Tableau de bord" hidden>
+      <header class="screen-head">
+        <h2>Tableau de bord</h2>
+        <button class="icon-btn" id="refresh-bord" type="button" aria-label="Rafraîchir">↻</button>
+      </header>
+      <p id="bord-mois" class="muted"></p>
+      <div id="bord-content" class="cards"></div>
+      <div id="bord-loading" class="loading">Chargement…</div>
+    </section>
+
+    <!-- ---------- HISTORIQUE ---------- -->
+    <section id="screen-histo" class="screen" data-title="Historique" hidden>
+      <header class="screen-head">
+        <h2>Historique</h2>
+        <button class="icon-btn" id="refresh-histo" type="button" aria-label="Rafraîchir">↻</button>
+      </header>
+      <div class="chips" id="histo-filtres">
+        <button class="chip is-active" data-filtre="tous">Tous</button>
+      </div>
+      <div id="histo-content" class="histo-list"></div>
+      <div id="histo-loading" class="loading">Chargement…</div>
+    </section>
+
+    <!-- ---------- NAVIGATION ---------- -->
+    <nav class="tabbar">
+      <button class="tab is-active" data-screen="screen-saisie"><span class="tab-ico">＋</span>Saisie</button>
+      <button class="tab" data-screen="screen-bord"><span class="tab-ico">▦</span>Bord</button>
+      <button class="tab" data-screen="screen-histo"><span class="tab-ico">≣</span>Historique</button>
+    </nav>
+  </div>
+
+  <!-- ================= RÉGLAGES ================= -->
+  <dialog id="settings">
+    <form method="dialog" class="settings-body">
+      <h2>Réglages</h2>
+      <label class="field">
+        <span class="field-label">URL de l'API (…/exec)</span>
+        <input id="s-api" type="url" placeholder="https://script.google.com/macros/s/…/exec">
+      </label>
+      <label class="field">
+        <span class="field-label">ID client Google (…apps.googleusercontent.com)</span>
+        <input id="s-client" type="text" placeholder="…apps.googleusercontent.com">
+      </label>
+      <p class="muted small">Laisse vide pour utiliser les valeurs par défaut du code.</p>
+      <div id="s-status" class="muted small"></div>
+      <div class="settings-actions">
+        <button type="button" id="s-save" class="btn btn-primary">Enregistrer</button>
+        <button type="button" id="s-logout" class="btn btn-ghost">Se déconnecter</button>
+      </div>
+      <button type="button" id="s-close" class="linklike">Fermer</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="offline-bar" class="offline-bar" hidden>Hors ligne — les saisies seront synchronisées au retour du réseau</div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
