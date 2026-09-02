@@ -5,7 +5,7 @@
  *  Tu peux aussi les saisir dans l'app via ⚙️ Réglages (elles priment alors).
  * ========================================================================== */
 const DEFAULTS = {
-  API_URL: 'https://script.google.com/macros/s/AKfycbzLfQfOpAPaMt6OKygBHA0PrJahOoc7sys5SAxDcUzt5ZH5p5WCXhjRxXvNM8zLzkk/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbybPWZzzUHlTEnZ5HK3e6Gc5xf4smgM_wFsCDd5tfPMALTEhvHzDcHIJYqO3ox9UlCn/exec',
   GOOGLE_CLIENT_ID: '291608936405-ddbgkq5hchqu42n3k92ajo95guokt6vn.apps.googleusercontent.com',
 };
 
