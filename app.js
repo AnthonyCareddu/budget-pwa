@@ -5,7 +5,7 @@
  *  Tu peux aussi les saisir dans l'app via ⚙️ Réglages (elles priment alors).
  * ========================================================================== */
 const DEFAULTS = {
-  API_URL: 'https://script.google.com/macros/s/AKfycbybPWZzzUHlTEnZ5HK3e6Gc5xf4smgM_wFsCDd5tfPMALTEhvHzDcHIJYqO3ox9UlCn/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbzLfQfOpAPaMt6OKygBHA0PrJahOoc7sys5SAxDcUzt5ZH5p5WCXhjRxXvNM8zLzkk/exec',
   GOOGLE_CLIENT_ID: '291608936405-ddbgkq5hchqu42n3k92ajo95guokt6vn.apps.googleusercontent.com',
 };
 
@@ -436,7 +436,11 @@ async function loadHistory() {
 function renderHistory() {
   const box = $('#histo-content');
   const f = state.histoFiltre;
-  const rows = state.histo.filter((r) => f === 'tous' || r.compte === f);
+  const rows = state.histo
+    .filter((r) => f === 'tous' || r.compte === f)
+    .slice()
+    // date décroissante (r.date = "AAAA-MM-JJ") ; à date égale, dernière saisie d'abord
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.rowNumber || 0) - (a.rowNumber || 0)));
   box.innerHTML = '';
   if (!rows.length) { box.innerHTML = '<p class="muted">Rien à afficher.</p>'; return; }
   let lastDay = '';
